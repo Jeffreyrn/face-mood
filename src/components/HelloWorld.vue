@@ -7,10 +7,16 @@
     <div class="face circle"></div>
     <div class="eyes" 
       :style="{height: eyeHeight+'vw'}">
-      <div class="left eye"></div>
-      <div class="right eye"></div>
+      <div class="left eye">
+        <div class="tear" :style="{opacity: tearOpacity}"></div>
+        <div class="eyebrow first" :style="{opacity: browOpacity}"></div>
+      </div>
+      <div class="right eye">
+        <div class="tear" :style="{opacity: tearOpacity}"></div>
+        <div class="eyebrow" :style="{opacity: browOpacity}"></div>
+      </div>
     </div>
-    <div class="mouth"
+    <div :class="mouthClass" 
       :style="{width: mouthWidth+'px', height: mouthHeight+'px', top:mouthTop+'%'}">
     </div>
    </div>
@@ -22,7 +28,7 @@ export default {
   data(){
     return {
       texts: ['As good as it gets', 'Pretty good', 'Okay I guess...', 'Not great...', 'Do not even ask...'],
-      text: 'Okay I guess...',
+      text: 'Pretty good',
       eyeHeight: 10,
     }
   },
@@ -54,26 +60,26 @@ export default {
     overscroll(document.querySelector('.scroll'));
     document.body.addEventListener('touchmove', (e)=> {
       //In this case, the default behavior is scrolling the body, which
-      //would result in an overflow.  Since we don't want that, we preventDefault.
+      //would result in an overflow. Since we don't want that, we preventDefault.
       if(!e._isScroller) {
         e.preventDefault();
       }
       let target = e.touches[0]
       let currentY = target.screenY;
-      let dt = this.texts[5-Math.ceil(this.eyeHeight/4)]
+      let dt = this.texts[4-Math.ceil(this.eyeHeight/4)]
       if (dt) {
         this.text = dt
       }
       if(currentY >lastY){
           // moved down
-          if(this.eyeHeight>0){
-            this.eyeHeight-=1
+          if(this.eyeHeight>0) {
+            this.eyeHeight-=0.5
           }
       }
       else if(currentY <lastY){
           // moved up
           if(this.eyeHeight<20){
-            this.eyeHeight+=1
+            this.eyeHeight+=0.5
           }
       }
       lastY = currentY;
@@ -83,14 +89,58 @@ export default {
     shadowRadius(){
       return 3 * (this.eyeHeight-10) + 20
     },
-    mouthHeight(){
-      return ((this.eyeHeight-10) / 2) + 20
+    mouthHeight(){ // 10 - 30
+      let h = this.h
+      if ( h < 19 ){
+        
+        if (h < 16) {
+          if (h < 14) return h * 0.9
+          return h * 0.7
+        }
+        return h * 0.5
+      }
+      if (h < 21) return h*0.7
+      if (h < 23) return h*0.9
+      return h
     },
     mouthWidth(){
       return 0.8 * (this.eyeHeight-10) + 40
     },
     mouthTop() {
       return 53 - ((this.eyeHeight-10)/4)
+    },
+    h() {
+      return ((this.eyeHeight-10) * 2 / 3) + 20
+    },
+    sad() {
+      if (this.h<=16) return true
+      return false
+    },
+    normal() {
+      if (this.h < 19 && this.h > 16) return true
+      return false
+    },
+    mouthClass() {
+      return {
+        mouth: true, 
+        sad: this.sad,
+        normal: this.normal,
+      }
+    },
+    tearOpacity() {
+      if (this.sad) {
+        if (this.eyeHeight > 2) return 0.2
+        if (this.eyeHeight > 0) return 0.4
+        if (this.eyeHeight > -2) return 0.6
+      }
+      return 0
+    },
+    browOpacity() {
+      if (this.eyeHeight > 15) return 0
+      if (this.eyeHeight > 10) return 0.2
+      if (this.eyeHeight > 5) return 0.4
+      if (this.eyeHeight > 0) return 0.6
+      return 0.8
     }
   },
 }
@@ -117,7 +167,6 @@ export default {
     align-items: center;
 }
 .face{
-  
   border-radius: 50%;
   background-color:  #ffdd40;
   width:30vw;
@@ -130,7 +179,6 @@ export default {
   background: radial-gradient( rgba(255,255,255,0.1), rgba(255,255,255,0.8));
 }
 .eyes{
-
   position: absolute;
   left:50%;
   transform: translate(-50%);
@@ -145,27 +193,69 @@ export default {
   height: 3vw;
   background: black;
   border: 2vw solid white;
+  position: relative;
+}
+.eye .tear {
+  position: absolute;
+  content: '';
+  width: 6vw;
+  height: 1.5vw;
+  background: rgb(151, 191, 252);
+  border-radius: 5px 5px 100% 100%;
+  margin-bottom: 2px; 
+  left: -1.5vw;
+  bottom: -2.5vw;
+}
+.eye .eyebrow {
+  position: absolute;
+  content: '';
+  width: 7vw;
+  height: 0.7vw;
+  background: rgb(99, 55, 14);
+  border-radius:  100% 100% 5px 5px;
+  margin-bottom: 2px; 
+  transform:rotate(10deg);
+  top: -4vw;
+  left: -1vw;
+}
+.eye .eyebrow.first {
+  transform:rotate(-10deg);
+  left: -3vw;
 }
 .mouth {
-        position: absolute;
-        left: 50%;
-        transform: translate(-50%, 0%);
-        background: #884E2C;
-        border-radius: 15px 15px 70px 70px;
-        display: flex;
-        justify-content: center;
-        align-items: flex-end;
-        z-index: 3;
-      }
-      .mouth:after {
-          display: block;
-          content: '';
-          width: 20px;
-          height: 8px;
-          background: #CD5B4D;
-          border-radius: 5px 5px 100% 100%;
-          margin-bottom: 2px;
-        }
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, 0%);
+  background: #884E2C;
+  border-radius: 15px 15px 70px 70px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  z-index: 3;
+}
+.mouth:after {
+  display: block;
+  content: '';
+  width: 20px;
+  height: 8px;
+  background: #CD5B4D;
+  border-radius: 5px 5px 100% 100%;
+  margin-bottom: 2px;
+}
+.mouth.normal{
+  border-radius: 10px 10px 10px 10px;
+}
+.mouth.normal:after{
+  display: none;
+}
+.mouth.sad{
+  border-radius: 70px 70px 10px 10px;
+}
+.mouth.sad:after{
+  width:10px;
+  height: 2px;
+  border-radius: 100% 100% 5px 5px;
+}
 .circle{
   position: absolute;
   left:50%;
