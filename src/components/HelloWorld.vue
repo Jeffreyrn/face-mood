@@ -78,7 +78,6 @@ export default {
       }
       lastY = currentY;
     }, {passive: false});
-    
   },
   computed: {
     shadowRadius(){
@@ -99,13 +98,14 @@ export default {
 
 <style>
 .title{
-  top: 10vw;
-    font-size: 7vw;
-    position: absolute;
-    color: white;
+  top: 30vw;
+  font-size: 7vw;
+  position: absolute;
+  color: white;
+  font-family:Verdana, Geneva, Tahoma, sans-serif;
 }
 .hello{
-  position:relative;  
+  position:relative;
   font-size: 25px;
   color: #6745;
   background: linear-gradient(#e66465, #9198e5);
