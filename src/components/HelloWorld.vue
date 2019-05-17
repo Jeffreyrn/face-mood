@@ -12,7 +12,6 @@
     </div>
     <div class="mouth"
       :style="{width: mouthWidth+'px', height: mouthHeight+'px', top:mouthTop+'%'}">
-
     </div>
    </div>
 </template>
@@ -23,91 +22,78 @@ export default {
   data(){
     return {
       texts: ['As good as it gets', 'Pretty good', 'Okay I guess...', 'Not great...', 'Do not even ask...'],
-      shadowRadius: 30,
       text: 'Okay I guess...',
-      eyeHeight: 9,
-      mouthHeight: 20,
-      mouthWidth: 40,
-      mouthTop: 53,
+      eyeHeight: 10,
     }
   },
   mounted(){
-    var lastY=null
-    var overscroll = function(el) {
-  el.addEventListener('touchstart', function() {
-    var top = el.scrollTop
-      , totalScroll = el.scrollHeight
-      , currentScroll = top + el.offsetHeight;
-    //If we're at the top or the bottom of the containers
-    //scroll, push up or down one pixel.
-    //
-    //this prevents the scroll from "passing through" to
-    //the body.
-    if(top === 0) {
-      el.scrollTop = 1;
-    } else if(currentScroll === totalScroll) {
-      el.scrollTop = top - 1;
+    let lastY=null
+    let overscroll = function(el) {
+      el.addEventListener('touchstart', function() {
+        var top = el.scrollTop
+          , totalScroll = el.scrollHeight
+          , currentScroll = top + el.offsetHeight;
+        //If we're at the top or the bottom of the containers
+        //scroll, push up or down one pixel.
+        //
+        //this prevents the scroll from "passing through" to
+        //the body.
+        if(top === 0) {
+          el.scrollTop = 1;
+        } else if(currentScroll === totalScroll) {
+          el.scrollTop = top - 1;
+        }
+      });
+      el.addEventListener('touchmove', function(evt) {
+        //if the content is actually scrollable, i.e. the content is long enough
+        //that scrolling can occur
+        if(el.offsetHeight < el.scrollHeight)
+          evt._isScroller = true;
+      });
     }
-  });
-  el.addEventListener('touchmove', function(evt) {
-    //if the content is actually scrollable, i.e. the content is long enough
-    //that scrolling can occur
-    if(el.offsetHeight < el.scrollHeight)
-      evt._isScroller = true;
-  });
-}
-overscroll(document.querySelector('.scroll'));
-document.body.addEventListener('touchmove', (e)=> {
-  //In this case, the default behavior is scrolling the body, which
-  //would result in an overflow.  Since we don't want that, we preventDefault.
-  if(!e._isScroller) {
-    e.preventDefault();
-  }
-  let target = e.touches[0]
-      var currentY = target.screenY;
+    overscroll(document.querySelector('.scroll'));
+    document.body.addEventListener('touchmove', (e)=> {
+      //In this case, the default behavior is scrolling the body, which
+      //would result in an overflow.  Since we don't want that, we preventDefault.
+      if(!e._isScroller) {
+        e.preventDefault();
+      }
+      let target = e.touches[0]
+      let currentY = target.screenY;
       let dt = this.texts[5-Math.ceil(this.eyeHeight/4)]
       if (dt) {
         this.text = dt
       }
       if(currentY >lastY){
           // moved down
-          if(this.shadowRadius>5){
-            this.shadowRadius-=1
-          }
           if(this.eyeHeight>0){
             this.eyeHeight-=1
           }
-          if(this.mouthHeight > 10){
-            this.mouthHeight-=1
-          }
-          if(this.mouthWidth > 20){
-            this.mouthWidth-=1
-          }
-          if(this.mouthTop < 56){
-            this.mouthTop+=0.4
-          }
-      }else if(currentY <lastY){
+      }
+      else if(currentY <lastY){
           // moved up
-          if(this.shadowRadius<50){
-            this.shadowRadius+=1
-          }
           if(this.eyeHeight<20){
             this.eyeHeight+=1
           }
-          if(this.mouthHeight < 20){
-            this.mouthHeight+=1
-          }
-          if(this.mouthWidth < 40){
-            this.mouthWidth+=1
-          }
-          if(this.mouthTop > 50){
-            this.mouthTop-=0.4
-          }
       }
       lastY = currentY;
-}, {passive: false});
+    }, {passive: false});
     
-  }
+  },
+  computed: {
+    shadowRadius(){
+      return 3 * (this.eyeHeight-10) + 20
+    },
+    mouthHeight(){
+      return ((this.eyeHeight-10) / 2) + 20
+    },
+    mouthWidth(){
+      return 0.8 * (this.eyeHeight-10) + 40
+    },
+    mouthTop() {
+      return 53 - ((this.eyeHeight-10)/4)
+    }
+  },
 }
 </script>
 
